@@ -1,22 +1,23 @@
-// Firebase imports (only needed if using <script type="module">)
+// ✅ Import Firebase modules (modular SDK from CDN)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// Firebase config (use yours)
+// ✅ Your latest Firebase config
 const firebaseConfig = {
-  apiKey: "AIzaSyD8fdxhK4N5TZtwxNzrejFPZ1mWtYT5VMQ",
+  apiKey: "AIzaSyC9v97BBHaQMuYuHdZKGxYVIgH5m8EPvRM",
   authDomain: "college-bus-tracker-1949b.firebaseapp.com",
-  databaseURL: "https://college-bus-tracker-1949b-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "college-bus-tracker-1949b",
-  storageBucket: "college-bus-tracker-1949b.appspot.com",
-  messagingSenderId: "744048439629",
-  appId: "1:744048439629:web:example"
+  storageBucket: "college-bus-tracker-1949b.firebasestorage.app",
+  messagingSenderId: "744043439629",
+  appId: "1:744043439629:web:2707394ed748b413651744",
+  measurementId: "G-WTXQS89VBX"
 };
 
+// ✅ Initialize Firebase & Realtime Database
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Bus stop locations
+// ✅ Define all bus stops
 const stops = [
   { name: "Allen Solley", lat: 16.059417, lng: 79.740333 },
   { name: "Satya", lat: 16.058472, lng: 79.739917 },
@@ -29,13 +30,14 @@ const stops = [
 
 let map, busMarker;
 
+// ✅ Google Maps initialization
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: stops[0],
     zoom: 15,
   });
 
-  // Show all stop markers
+  // Show all stops as markers
   stops.forEach((stop) => {
     new google.maps.Marker({
       position: { lat: stop.lat, lng: stop.lng },
@@ -44,7 +46,7 @@ function initMap() {
     });
   });
 
-  // Add bus marker
+  // Initial bus marker
   busMarker = new google.maps.Marker({
     position: stops[0],
     map: map,
@@ -58,6 +60,7 @@ function initMap() {
   listenForBusLocation();
 }
 
+// ✅ Real-time listener for GPS updates
 function listenForBusLocation() {
   const locationRef = ref(db, "bus/location");
 
@@ -69,15 +72,18 @@ function listenForBusLocation() {
       busMarker.setPosition(busLatLng);
       map.panTo(busLatLng);
 
-      // Update status
+      // Update UI
       document.getElementById("currentStop").textContent = getNearestStop(busLatLng);
-      document.getElementById("nextStop").textContent = "Live tracking";
+      document.getElementById("nextStop").textContent = "Tracking...";
       document.getElementById("eta").textContent = "--";
-      document.getElementById("alert").textContent = `Bus is moving...`;
+      document.getElementById("alert").textContent = "🚌 Bus is moving live.";
+    } else {
+      document.getElementById("alert").textContent = "⚠️ No GPS data available.";
     }
   });
 }
 
+// ✅ Utility to get nearest stop name
 function getNearestStop(current) {
   let nearest = stops[0];
   let minDist = getDistance(current, stops[0]);
@@ -93,8 +99,12 @@ function getNearestStop(current) {
   return nearest.name;
 }
 
+// ✅ Calculate distance between 2 coordinates
 function getDistance(loc1, loc2) {
   const dx = loc1.lat - loc2.lat;
   const dy = loc1.lng - loc2.lng;
   return Math.sqrt(dx * dx + dy * dy);
 }
+
+// ✅ Expose initMap for Google Maps to call
+window.initMap = initMap;
