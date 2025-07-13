@@ -1,23 +1,26 @@
-// ✅ Import Firebase modules (modular SDK from CDN)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+// ✅ Firebase imports (ES module version)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
 
-// ✅ Your latest Firebase config
+// 🔐 Your Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyC9v97BBHaQMuYuHdZKGxYVIgH5m8EPvRM",
   authDomain: "college-bus-tracker-1949b.firebaseapp.com",
+  databaseURL: "https://college-bus-tracker-1949b-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "college-bus-tracker-1949b",
-  storageBucket: "college-bus-tracker-1949b.firebasestorage.app",
+  storageBucket: "college-bus-tracker-1949b.appspot.com",
   messagingSenderId: "744043439629",
-  appId: "1:744043439629:web:2707394ed748b413651744",
-  measurementId: "G-WTXQS89VBX"
+  appId: "1:744043439629:web:c723aed45b2b1d00651744",
+  measurementId: "G-8FX7KZ9DC4"
 };
 
-// ✅ Initialize Firebase & Realtime Database
+// 🧭 Initialize Firebase and Database
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const analytics = getAnalytics(app);
 
-// ✅ Define all bus stops
+// 🚏 Define Bus Stops
 const stops = [
   { name: "Allen Solley", lat: 16.059417, lng: 79.740333 },
   { name: "Satya", lat: 16.058472, lng: 79.739917 },
@@ -30,15 +33,15 @@ const stops = [
 
 let map, busMarker;
 
-// ✅ Google Maps initialization
-function initMap() {
+// 🗺️ Expose Google Maps Callback
+window.initMap = function () {
   map = new google.maps.Map(document.getElementById("map"), {
     center: stops[0],
     zoom: 15,
   });
 
-  // Show all stops as markers
-  stops.forEach((stop) => {
+  // 📌 Add Stop Markers
+  stops.forEach(stop => {
     new google.maps.Marker({
       position: { lat: stop.lat, lng: stop.lng },
       map: map,
@@ -46,7 +49,7 @@ function initMap() {
     });
   });
 
-  // Initial bus marker
+  // 🚌 Bus Marker
   busMarker = new google.maps.Marker({
     position: stops[0],
     map: map,
@@ -57,14 +60,15 @@ function initMap() {
     },
   });
 
+  // 🔄 Start Listening for Updates
   listenForBusLocation();
-}
+};
 
-// ✅ Real-time listener for GPS updates
+// 📡 Firebase Listener
 function listenForBusLocation() {
   const locationRef = ref(db, "bus/location");
 
-  onValue(locationRef, (snapshot) => {
+  onValue(locationRef, snapshot => {
     const data = snapshot.val();
     if (data && data.latitude && data.longitude) {
       const busLatLng = { lat: data.latitude, lng: data.longitude };
@@ -72,18 +76,16 @@ function listenForBusLocation() {
       busMarker.setPosition(busLatLng);
       map.panTo(busLatLng);
 
-      // Update UI
+      // 📊 Update Tracker Panel
       document.getElementById("currentStop").textContent = getNearestStop(busLatLng);
-      document.getElementById("nextStop").textContent = "Tracking...";
+      document.getElementById("nextStop").textContent = "Live tracking";
       document.getElementById("eta").textContent = "--";
-      document.getElementById("alert").textContent = "🚌 Bus is moving live.";
-    } else {
-      document.getElementById("alert").textContent = "⚠️ No GPS data available.";
+      document.getElementById("alert").textContent = "Bus is moving...";
     }
   });
 }
 
-// ✅ Utility to get nearest stop name
+// 📍 Find Nearest Stop
 function getNearestStop(current) {
   let nearest = stops[0];
   let minDist = getDistance(current, stops[0]);
@@ -95,16 +97,12 @@ function getNearestStop(current) {
       nearest = stops[i];
     }
   }
-
   return nearest.name;
 }
 
-// ✅ Calculate distance between 2 coordinates
+// 📐 Simple Distance Calculator
 function getDistance(loc1, loc2) {
   const dx = loc1.lat - loc2.lat;
   const dy = loc1.lng - loc2.lng;
   return Math.sqrt(dx * dx + dy * dy);
 }
-
-// ✅ Expose initMap for Google Maps to call
-window.initMap = initMap;

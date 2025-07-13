@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Send GPS Location</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8fb;
+      text-align: center;
+      padding-top: 60px;
+    }
+    h2 {
+      color: #2d89ef;
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+    }
+    #status {
+      font-size: 1.1rem;
+      color: #333;
+      margin-top: 20px;
+    }
+  </style>
+
+  <script type="module">
+    // ✅ Firebase imports (v11+ with ES Modules)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+
+    // 🔐 Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyC9v97BBHaQMuYuHdZKGxYVIgH5m8EPvRM",
+      authDomain: "college-bus-tracker-1949b.firebaseapp.com",
+      databaseURL: "https://college-bus-tracker-1949b-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "college-bus-tracker-1949b",
+      storageBucket: "college-bus-tracker-1949b.appspot.com",
+      messagingSenderId: "744043439629",
+      appId: "1:744043439629:web:c723aed45b2b1d00651744",
+      measurementId: "G-8FX7KZ9DC4"
+    };
+
+    // 🚀 Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const analytics = getAnalytics(app);
+
+    // 📡 Send location to Firebase
+    function updateLocation(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+
+      set(ref(db, "bus/location"), {
+        latitude: lat,
+        longitude: lng
+      })
+      .then(() => {
+        document.getElementById("status").textContent =
+          `📤 Sent: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      })
+      .catch((error) => {
+        document.getElementById("status").textContent =
+          `❌ Firebase Error: ${error.message}`;
+      });
+    }
+
+    // ❌ Handle location errors
+    function error(err) {
+      document.getElementById("status").textContent =
+        `❌ Location Error: ${err.message}`;
+    }
+
+    // 🔄 Continuously send updates every 4 seconds
+    setInterval(() => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(updateLocation, error);
+      } else {
+        document.getElementById("status").textContent =
+          "❌ Geolocation not supported by this browser.";
+      }
+    }, 4000);
+  </script>
+</head>
+<body>
+  <h2>📍 Sending Live GPS to Firebase</h2>
+  <p id="status">Waiting for GPS...</p>
+</body>
+</html>
