@@ -1,7 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Send GPS Location</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8fb;
+      text-align: center;
+      padding-top: 50px;
+    }
+    h2 {
+      color: #2d89ef;
+    }
+    #status {
+      font-size: 1.1em;
+      color: #444;
+    }
+  </style>
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js"></script>
 </head>
@@ -10,6 +28,7 @@
   <p id="status">Waiting for GPS...</p>
 
   <script>
+    // ✅ Firebase configuration (your actual project config)
     const firebaseConfig = {
       apiKey: "AIzaSyCy9y9B8HHqUMuYkdZK9YIvGJHm8SEpRVM",
       authDomain: "college-bus-tracker-1949b.firebaseapp.com",
@@ -20,22 +39,39 @@
       appId: "1:744048439629:web:2897ade4784b136517f44"
     };
 
+    // ✅ Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // ✅ Function to send location
     function updateLocation(position) {
       const lat = position.coords.latitude;
       const lng = position.coords.longitude;
-      db.ref("busLocation").set({ lat, lng });
-      document.getElementById("status").textContent = `📤 Sent: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+      db.ref("bus/location").set({ latitude: lat, longitude: lng })
+        .then(() => {
+          document.getElementById("status").textContent =
+            `📤 Sent: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        })
+        .catch((error) => {
+          document.getElementById("status").textContent =
+            `❌ Firebase Error: ${error.message}`;
+        });
     }
 
     function error(err) {
-      document.getElementById("status").textContent = `❌ Error: ${err.message}`;
+      document.getElementById("status").textContent =
+        `❌ Location Error: ${err.message}`;
     }
 
+    // ✅ Request location every 4 seconds
     setInterval(() => {
-      navigator.geolocation.getCurrentPosition(updateLocation, error);
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(updateLocation, error);
+      } else {
+        document.getElementById("status").textContent =
+          "❌ Geolocation not supported by your browser.";
+      }
     }, 4000);
   </script>
 </body>
