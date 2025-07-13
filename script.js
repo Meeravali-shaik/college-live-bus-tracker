@@ -1,9 +1,8 @@
-// ✅ Firebase imports (ES module version)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
 
-// 🔐 Your Firebase Configuration
+// 🔐 Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyC9v97BBHaQMuYuHdZKGxYVIgH5m8EPvRM",
   authDomain: "college-bus-tracker-1949b.firebaseapp.com",
@@ -15,12 +14,12 @@ const firebaseConfig = {
   measurementId: "G-8FX7KZ9DC4"
 };
 
-// 🧭 Initialize Firebase and Database
+// 🚀 Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const analytics = getAnalytics(app);
 
-// 🚏 Define Bus Stops
+// 🚌 Define Stops
 const stops = [
   { name: "Allen Solley", lat: 16.059417, lng: 79.740333 },
   { name: "Satya", lat: 16.058472, lng: 79.739917 },
@@ -33,31 +32,14 @@ const stops = [
 
 let map, busMarker;
 
-// 🗺️ Expose Google Maps Callback
+// ✅ Global initMap
 window.initMap = function () {
   map = new google.maps.Map(document.getElementById("map"), {
     center: stops[0],
     zoom: 15,
   });
 
-  onValue(locationRef, snapshot => {
-  const data = snapshot.val();
-  console.log("📡 Firebase update received:", data); // ✅ Add this line
-
-  if (data && data.latitude && data.longitude) {
-    const busLatLng = { lat: data.latitude, lng: data.longitude };
-
-    busMarker.setPosition(busLatLng);
-    map.panTo(busLatLng);
-
-    document.getElementById("currentStop").textContent = getNearestStop(busLatLng);
-    document.getElementById("nextStop").textContent = "Live tracking";
-    document.getElementById("eta").textContent = "--";
-    document.getElementById("alert").textContent = "Bus is moving...";
-  }
-});
-
-  // 📌 Add Stop Markers
+  // 📌 Stop markers
   stops.forEach(stop => {
     new google.maps.Marker({
       position: { lat: stop.lat, lng: stop.lng },
@@ -66,7 +48,7 @@ window.initMap = function () {
     });
   });
 
-  // 🚌 Bus Marker
+  // 🚌 Bus marker
   busMarker = new google.maps.Marker({
     position: stops[0],
     map: map,
@@ -77,23 +59,24 @@ window.initMap = function () {
     },
   });
 
-  // 🔄 Start Listening for Updates
+  // 🔄 Start Firebase listener
   listenForBusLocation();
 };
 
-// 📡 Firebase Listener
+// 📡 Firebase listener
 function listenForBusLocation() {
   const locationRef = ref(db, "bus/location");
 
   onValue(locationRef, snapshot => {
     const data = snapshot.val();
+    console.log("📡 Firebase update received:", data);
+
     if (data && data.latitude && data.longitude) {
       const busLatLng = { lat: data.latitude, lng: data.longitude };
-
       busMarker.setPosition(busLatLng);
       map.panTo(busLatLng);
 
-      // 📊 Update Tracker Panel
+      // Update UI
       document.getElementById("currentStop").textContent = getNearestStop(busLatLng);
       document.getElementById("nextStop").textContent = "Live tracking";
       document.getElementById("eta").textContent = "--";
@@ -102,7 +85,7 @@ function listenForBusLocation() {
   });
 }
 
-// 📍 Find Nearest Stop
+// 📍 Nearest stop
 function getNearestStop(current) {
   let nearest = stops[0];
   let minDist = getDistance(current, stops[0]);
@@ -117,7 +100,7 @@ function getNearestStop(current) {
   return nearest.name;
 }
 
-// 📐 Simple Distance Calculator
+// 📐 Distance calc
 function getDistance(loc1, loc2) {
   const dx = loc1.lat - loc2.lat;
   const dy = loc1.lng - loc2.lng;
