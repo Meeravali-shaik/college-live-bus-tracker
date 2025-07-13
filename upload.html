@@ -19,66 +19,56 @@
       color: #444;
     }
   </style>
+</head>
+<body>
+  <h2>📍 Sending GPS to Firebase</h2>
+  <p id="status">Waiting for GPS...</p>
 
-  <!-- ✅ Load Firebase SDKs FIRST -->
-  <script defer src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js"></script>
-
-  <!-- ✅ Your main GPS tracking logic -->
-  <script defer>
-    console.log("✅ Script Loaded");
+  <!-- ✅ Firebase + GPS Tracking Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCy9y9B8HHqUMuYkdZK9YIvGJHm8SEpRVM",
+      apiKey: "AIzaSyC9v97BBHaQMuYuHdZKGxYVIgH5m8EPvRM",
       authDomain: "college-bus-tracker-1949b.firebaseapp.com",
       databaseURL: "https://college-bus-tracker-1949b-default-rtdb.firebaseio.com",
       projectId: "college-bus-tracker-1949b",
       storageBucket: "college-bus-tracker-1949b.appspot.com",
-      messagingSenderId: "744048439629",
-      appId: "1:744048439629:web:2897ade4784b136517f44"
+      messagingSenderId: "744043439629",
+      appId: "1:744043439629:web:2707394ed748b413651744"
     };
 
-    // ✅ Initialize Firebase
-    window.addEventListener('DOMContentLoaded', () => {
-      firebase.initializeApp(firebaseConfig);
-      const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      function updateLocation(position) {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        console.log("📍 Location fetched:", lat, lng);
+    function updateLocation(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
 
-        db.ref("bus/location").set({ latitude: lat, longitude: lng })
-          .then(() => {
-            console.log("✅ Sent to Firebase");
-            document.getElementById("status").textContent = `📤 Sent: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-          })
-          .catch((error) => {
-            console.error("❌ Firebase Error:", error.message);
-            document.getElementById("status").textContent = `❌ Firebase Error: ${error.message}`;
-          });
+      set(ref(db, "bus/location"), {
+        latitude: lat,
+        longitude: lng
+      })
+      .then(() => {
+        document.getElementById("status").textContent = `📤 Sent: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      })
+      .catch((err) => {
+        document.getElementById("status").textContent = `❌ Firebase Error: ${err.message}`;
+      });
+    }
+
+    function error(err) {
+      document.getElementById("status").textContent = `❌ Location Error: ${err.message}`;
+    }
+
+    setInterval(() => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(updateLocation, error);
+      } else {
+        document.getElementById("status").textContent = "❌ Geolocation not supported.";
       }
-
-      function error(err) {
-        console.error("❌ Location Error:", err.message);
-        document.getElementById("status").textContent = `❌ Location Error: ${err.message}`;
-      }
-
-      setInterval(() => {
-        console.log("⏳ Trying to fetch location...");
-        if ("geolocation" in navigator) {
-          navigator.geolocation.getCurrentPosition(updateLocation, error);
-        } else {
-          console.error("❌ Geolocation not supported");
-          document.getElementById("status").textContent = "❌ Geolocation not supported by your browser.";
-        }
-      }, 4000);
-    });
+    }, 4000);
   </script>
-</head>
-
-<body>
-  <h2>📍 Sending GPS to Firebase</h2>
-  <p id="status">Waiting for GPS...</p>
 </body>
 </html>
