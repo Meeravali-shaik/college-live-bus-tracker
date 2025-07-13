@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Send GPS Location</title>
+  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <h2>📍 Sending GPS to Firebase</h2>
+  <p id="status">Waiting for GPS...</p>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCy9y9B8HHqUMuYkdZK9YIvGJHm8SEpRVM",
+      authDomain: "college-bus-tracker-1949b.firebaseapp.com",
+      databaseURL: "https://college-bus-tracker-1949b-default-rtdb.firebaseio.com",
+      projectId: "college-bus-tracker-1949b",
+      storageBucket: "college-bus-tracker-1949b.appspot.com",
+      messagingSenderId: "744048439629",
+      appId: "1:744048439629:web:2897ade4784b136517f44"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function updateLocation(position) {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      db.ref("busLocation").set({ lat, lng });
+      document.getElementById("status").textContent = `📤 Sent: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+
+    function error(err) {
+      document.getElementById("status").textContent = `❌ Error: ${err.message}`;
+    }
+
+    setInterval(() => {
+      navigator.geolocation.getCurrentPosition(updateLocation, error);
+    }, 4000);
+  </script>
+</body>
+</html>

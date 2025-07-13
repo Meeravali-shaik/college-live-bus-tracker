@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>College Bus Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🚌 College Bus Live Tracker</h1>
+    <div id="map"></div>
+    <div class="status-box">
+      <p><strong>📍 Current Stop:</strong> <span id="currentStop">Loading...</span></p>
+      <p><strong>➡️ Next Stop:</strong> <span id="nextStop">Loading...</span></p>
+      <p><strong>🕒 ETA:</strong> <span id="eta">--</span></p>
+      <p><strong>🔔 Alert:</strong> <span id="alert">Waiting for location...</span></p>
+    </div>
+  </div>
+
+  <script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD8fdxhK4N5TZtwxNzrejFPZ1mWtYT5VMQ&callback=initMap">
+</script>
+<script src="script.js"></script>
+</body>
+</html>
