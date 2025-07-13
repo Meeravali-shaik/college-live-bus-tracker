@@ -40,6 +40,23 @@ window.initMap = function () {
     zoom: 15,
   });
 
+  onValue(locationRef, snapshot => {
+  const data = snapshot.val();
+  console.log("📡 Firebase update received:", data); // ✅ Add this line
+
+  if (data && data.latitude && data.longitude) {
+    const busLatLng = { lat: data.latitude, lng: data.longitude };
+
+    busMarker.setPosition(busLatLng);
+    map.panTo(busLatLng);
+
+    document.getElementById("currentStop").textContent = getNearestStop(busLatLng);
+    document.getElementById("nextStop").textContent = "Live tracking";
+    document.getElementById("eta").textContent = "--";
+    document.getElementById("alert").textContent = "Bus is moving...";
+  }
+});
+
   // 📌 Add Stop Markers
   stops.forEach(stop => {
     new google.maps.Marker({
